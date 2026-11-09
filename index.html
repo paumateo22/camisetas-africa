@@ -220,10 +220,11 @@ select { font: 500 14px var(--body); color: var(--ink); background: var(--surfac
 
 <script>
 (() => {
+try { ["caf-me","caf-votes","caf-queue"].forEach(k => localStorage.removeItem(k)); } catch (e) {}
 const API = (window.API_URL || "").trim();
 const KITS = window.KITS, BYID = Object.fromEntries(KITS.map(k => [k.i, k]));
 const FKA = "https://www.footballkitarchive.com/";
-const LS = { me: "caf-me", votes: "caf-votes", queue: "caf-queue" };
+const LS = { me: "caf2-me", votes: "caf2-votes", queue: "caf2-queue" }; // ronda 2: claves nuevas para empezar de cero
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const get = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
@@ -329,7 +330,21 @@ function setTab(t) {
 }
 
 /* ---------- votar ---------- */
-const pending = () => KITS.filter(k => !votes[k.i]);
+// Orden aleatorio por persona: se baraja con una semilla sacada del nombre,
+// así cada votante ve un orden distinto pero el suyo no cambia al recargar ni al cambiar de móvil.
+function seedOf(s) { let h = 2166136261; for (const c of s.toLowerCase().trim()) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function rng(a) { return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+let order = KITS, orderFor = null;
+function getOrder() {
+  const key = me ? me.name : "";
+  if (orderFor !== key) {
+    const r = rng(seedOf(key)), a = KITS.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    order = a; orderFor = key;
+  }
+  return order;
+}
+const pending = () => getOrder().filter(k => !votes[k.i]);
 function cardHTML(k, back) {
   return `<article class="card${back ? " back" : ""}" data-id="${k.i}">
     <img src="${img(k)}" alt="${esc(label(k))}" draggable="false">
