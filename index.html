@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Camisetas de África</title>
+<title>Camisetas de África · Final</title>
 <meta name="description" content="Vota del 1 al 5 las camisetas de las selecciones africanas y mira el ranking en directo.">
 <meta name="theme-color" content="#0D1813">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23C8901A' d='M20 6l-14 8 6 12 6-3v35h28V23l6 3 6-12-14-8c-2 5-6 8-12 8s-10-3-12-8z'/%3E%3C/svg%3E">
@@ -148,8 +148,8 @@ select { font: 500 14px var(--body); color: var(--ink); background: var(--surfac
 }
 @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition: none; } }
 </style>
-<script src="config.js"></script>
-<script src="kits.js"></script>
+<script src="config.js?v=3"></script>
+<script src="kits.js?v=3"></script>
 </head>
 <body>
 <header>
@@ -220,11 +220,11 @@ select { font: 500 14px var(--body); color: var(--ink); background: var(--surfac
 
 <script>
 (() => {
-try { ["caf-me","caf-votes","caf-queue"].forEach(k => localStorage.removeItem(k)); } catch (e) {}
+try { ["caf-me","caf-votes","caf-queue","caf2-me","caf2-votes","caf2-queue"].forEach(k => localStorage.removeItem(k)); } catch (e) {}
 const API = (window.API_URL || "").trim();
 const KITS = window.KITS, BYID = Object.fromEntries(KITS.map(k => [k.i, k]));
 const FKA = "https://www.footballkitarchive.com/";
-const LS = { me: "caf2-me", votes: "caf2-votes", queue: "caf2-queue" }; // ronda 2: claves nuevas para empezar de cero
+const LS = { me: "caf3-me", votes: "caf3-votes", queue: "caf3-queue" }; // ronda 3 (final): claves nuevas para empezar de cero
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const get = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
