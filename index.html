@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Camisetas de África · Final</title>
+<title>Camisetas de África</title>
 <meta name="description" content="Vota del 1 al 5 las camisetas de las selecciones africanas y mira el ranking en directo.">
 <meta name="theme-color" content="#0D1813">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23C8901A' d='M20 6l-14 8 6 12 6-3v35h28V23l6 3 6-12-14-8c-2 5-6 8-12 8s-10-3-12-8z'/%3E%3C/svg%3E">
@@ -74,7 +74,7 @@ main { padding-block: 16px 40px; }
 .card { position: absolute; inset: 0; border-radius: 22px; overflow: hidden; background: var(--photo); border: 1px solid var(--line); box-shadow: 0 12px 32px rgba(0,0,0,.14); touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .card.back { transform: scale(.95) translateY(12px); opacity: .6; }
 .card.anim { transition: transform .32s ease, opacity .32s ease; }
-.card img { position: absolute; left: 0; right: 0; top: 0; bottom: 30%; width: 100%; height: 70%; object-fit: contain; padding: 16px; pointer-events: none; }
+.card img { position: absolute; left: 0; right: 0; top: 0; bottom: 30%; width: 100%; height: 70%; object-fit: contain; padding: 10px; pointer-events: none; }
 .card .info { position: absolute; left: 0; right: 0; bottom: 0; min-height: 30%; background: var(--shade); color: #F4F7F4; padding: 12px 16px 14px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
 .card .cn { font: 800 30px/1 var(--display); text-transform: uppercase; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .card .cn small { font: 700 12px var(--body); background: rgba(255,255,255,.16); padding: 2px 7px; border-radius: 6px; }
@@ -148,8 +148,8 @@ select { font: 500 14px var(--body); color: var(--ink); background: var(--surfac
 }
 @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition: none; } }
 </style>
-<script src="config.js?v=3"></script>
-<script src="kits.js?v=3"></script>
+<script src="config.js?v=4"></script>
+<script src="kits.js?v=4"></script>
 </head>
 <body>
 <header>
@@ -220,17 +220,19 @@ select { font: 500 14px var(--body); color: var(--ink); background: var(--surfac
 
 <script>
 (() => {
-try { ["caf-me","caf-votes","caf-queue","caf2-me","caf2-votes","caf2-queue"].forEach(k => localStorage.removeItem(k)); } catch (e) {}
+try { ["caf-me","caf-votes","caf-queue","caf2-me","caf2-votes","caf2-queue","caf3-me","caf3-votes","caf3-queue"].forEach(k => localStorage.removeItem(k)); } catch (e) {}
 const API = (window.API_URL || "").trim();
 const KITS = window.KITS, BYID = Object.fromEntries(KITS.map(k => [k.i, k]));
 const FKA = "https://www.footballkitarchive.com/";
-const LS = { me: "caf3-me", votes: "caf3-votes", queue: "caf3-queue" }; // ronda 3 (final): claves nuevas para empezar de cero
+const LS = { me: "caf4-me", votes: "caf4-votes", queue: "caf4-queue" }; // ronda 4: claves nuevas para empezar de cero
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const get = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
 const set = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const img = k => `img/${k.i}.webp`;
-const label = k => `${k.c} ${k.l} ${k.s}`;
+const label = k => [k.c, k.l, k.s].filter(Boolean).join(" ");
+const kt = k => k.s ? `${k.l} · ${k.s}` : k.l;
+const bgOf = k => k.bg ? ` style="background:${k.bg}"` : "";
 const fmt = x => x.toFixed(2).replace(".", ",");
 
 let me = get(LS.me);             // {name, pin}
@@ -346,14 +348,14 @@ function getOrder() {
 }
 const pending = () => getOrder().filter(k => !votes[k.i]);
 function cardHTML(k, back) {
-  return `<article class="card${back ? " back" : ""}" data-id="${k.i}">
+  return `<article class="card${back ? " back" : ""}" data-id="${k.i}"${bgOf(k)}>
     <img src="${img(k)}" alt="${esc(label(k))}" draggable="false">
     <span class="stamp"></span>
     <div class="info">
       <div class="cn">${esc(k.c)} <small>FIFA ${k.f}</small></div>
-      <div class="kt">${esc(k.l)} · ${esc(k.s)}</div>
-      <div class="meta">${esc(k.cp)}</div>
-      <a href="${FKA}${k.u}/" target="_blank" rel="noopener">Ver más fotos</a>
+      <div class="kt">${esc(kt(k))}</div>
+      ${k.cp ? `<div class="meta">${esc(k.cp)}</div>` : ""}
+      ${k.u ? `<a href="${FKA}${k.u}/" target="_blank" rel="noopener">Ver más fotos</a>` : ""}
     </div></article>`;
 }
 function renderVote() {
@@ -414,9 +416,9 @@ function renderRank() {
     const mine = votes[x.k.i];
     return `<div class="li${i < 3 ? " top" : ""}">
       <div class="pos">${i + 1}</div>
-      <div class="th"><img src="${img(x.k)}" alt="" loading="lazy"></div>
+      <div class="th"${bgOf(x.k)}><img src="${img(x.k)}" alt="" loading="lazy"></div>
       <div class="inf"><div class="cn">${esc(x.k.c)}</div>
-        <div class="meta">${esc(x.k.l)} · ${esc(x.k.s)}</div>
+        <div class="meta">${esc(kt(x.k))}</div>
         ${mine ? `<div class="mine">Tu nota: ${mine}</div>` : ""}</div>
       <div class="scr"><b style="color:var(--r${Math.round(x.avg)})">${fmt(x.avg)}</b><span>${x.a[0]} voto${x.a[0] === 1 ? "" : "s"}</span><span>${x.a[2]} × 5★</span></div>
     </div>`;
@@ -432,8 +434,8 @@ function renderMine() {
   $("m-f").innerHTML = FILTERS.map(([n, t]) => `<button class="chip" data-n="${n}" aria-pressed="${filterN === n}">${t}${n ? " ★" : ""} · ${count(n)}</button>`).join("");
   const list = KITS.filter(k => filterN ? votes[k.i] === filterN : votes[k.i]);
   $("m-grid").innerHTML = list.map(k => `<article class="gc" data-card="${k.i}">
-    <div class="ph"><img src="${img(k)}" alt="${esc(label(k))}" loading="lazy"></div>
-    <div class="bd"><div class="cn">${esc(k.c)}</div><div class="meta">${esc(k.l)} · ${esc(k.s)}</div>
+    <div class="ph"${bgOf(k)}><img src="${img(k)}" alt="${esc(label(k))}" loading="lazy"></div>
+    <div class="bd"><div class="cn">${esc(k.c)}</div><div class="meta">${esc(kt(k))}</div>
     <div class="mini">${[1, 2, 3, 4, 5].map(n => `<button data-k="${k.i}" data-n="${n}" aria-pressed="${votes[k.i] === n}" aria-label="Nota ${n}">${n}</button>`).join("")}</div></div>
   </article>`).join("");
   $("m-empty").hidden = list.length > 0;
