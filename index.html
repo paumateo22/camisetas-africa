@@ -80,6 +80,8 @@ main { padding-block: 16px 40px; }
 .card .cn small { font: 700 12px var(--body); background: rgba(255,255,255,.16); padding: 2px 7px; border-radius: 6px; }
 .card .kt { font-weight: 700; }
 .card .meta { font-size: 13px; opacity: .85; }
+.card .price { font-size: 14px; margin-top: 2px; }
+.card .price b { font-size: 19px; color: #F0B93A; }
 .card a { color: inherit; font-size: 12px; opacity: .75; }
 .stamp { position: absolute; top: 18px; left: 50%; transform: translateX(-50%) rotate(-8deg); padding: 3px 14px; border: 4px solid currentColor; border-radius: 10px; font: 800 40px var(--display); background: var(--photo); opacity: 0; pointer-events: none; white-space: nowrap; }
 .rate { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; width: min(100%, 420px); }
@@ -148,8 +150,8 @@ select { font: 500 14px var(--body); color: var(--ink); background: var(--surfac
 }
 @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition: none; } }
 </style>
-<script src="config.js?v=5"></script>
-<script src="kits.js?v=5"></script>
+<script src="config.js?v=7"></script>
+<script src="kits.js?v=7"></script>
 </head>
 <body>
 <header>
@@ -231,6 +233,8 @@ const get = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e)
 const set = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const img = k => `img/${k.p || (k.i + ".webp")}`;
 const label = k => [k.c, k.l, k.s].filter(Boolean).join(" ");
+const NAME_EXTRA = 2; // € extra por nombre y dorsal
+const priceTxt = k => k.pr ? `${k.pr} €${k.pv ? " (versión jugador)" : ""} · ${k.pr + NAME_EXTRA} € con nombre y dorsal` : "";
 const kt = k => k.s ? `${k.l} · ${k.s}` : (k.l || "");
 const bgOf = k => k.bg ? ` style="background:${k.bg}"` : "";
 const fmt = x => x.toFixed(2).replace(".", ",");
@@ -355,6 +359,7 @@ function cardHTML(k, back) {
       <div class="cn">${esc(k.c)}</div>
       ${kt(k) ? `<div class="kt">${esc(kt(k))}</div>` : ""}
       ${k.cp ? `<div class="meta">${esc(k.cp)}</div>` : ""}
+      ${k.pr ? `<div class="price"><b>${k.pr} €</b>${k.pv ? " versión jugador" : ""} · ${k.pr + NAME_EXTRA} € con nombre y dorsal</div>` : ""}
       ${k.u ? `<a href="${FKA}${k.u}/" target="_blank" rel="noopener">Ver más fotos</a>` : ""}
     </div></article>`;
 }
@@ -418,7 +423,7 @@ function renderRank() {
       <div class="pos">${i + 1}</div>
       <div class="th"${bgOf(x.k)}><img src="${img(x.k)}" alt="" loading="lazy"></div>
       <div class="inf"><div class="cn">${esc(x.k.c)}</div>
-        ${kt(x.k) ? `<div class="meta">${esc(kt(x.k))}</div>` : ""}
+        ${kt(x.k) ? `<div class="meta">${esc(kt(x.k))}</div>` : ""}${x.k.pr ? `<div class="meta">${esc(priceTxt(x.k))}</div>` : ""}
         ${mine ? `<div class="mine">Tu nota: ${mine}</div>` : ""}</div>
       <div class="scr"><b style="color:var(--r${Math.round(x.avg)})">${fmt(x.avg)}</b><span>${x.a[0]} voto${x.a[0] === 1 ? "" : "s"}</span><span>${x.a[2]} × 5★</span></div>
     </div>`;
@@ -435,7 +440,7 @@ function renderMine() {
   const list = KITS.filter(k => filterN ? votes[k.i] === filterN : votes[k.i]);
   $("m-grid").innerHTML = list.map(k => `<article class="gc" data-card="${k.i}">
     <div class="ph"${bgOf(k)}><img src="${img(k)}" alt="${esc(label(k))}" loading="lazy"></div>
-    <div class="bd"><div class="cn">${esc(k.c)}</div>${kt(k) ? `<div class="meta">${esc(kt(k))}</div>` : ""}
+    <div class="bd"><div class="cn">${esc(k.c)}</div>${kt(k) ? `<div class="meta">${esc(kt(k))}</div>` : ""}${k.pr ? `<div class="meta">${esc(priceTxt(k))}</div>` : ""}
     <div class="mini">${[1, 2, 3, 4, 5].map(n => `<button data-k="${k.i}" data-n="${n}" aria-pressed="${votes[k.i] === n}" aria-label="Nota ${n}">${n}</button>`).join("")}</div></div>
   </article>`).join("");
   $("m-empty").hidden = list.length > 0;
