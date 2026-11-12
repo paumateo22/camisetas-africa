@@ -148,8 +148,8 @@ select { font: 500 14px var(--body); color: var(--ink); background: var(--surfac
 }
 @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition: none; } }
 </style>
-<script src="config.js?v=4"></script>
-<script src="kits.js?v=4"></script>
+<script src="config.js?v=5"></script>
+<script src="kits.js?v=5"></script>
 </head>
 <body>
 <header>
@@ -229,9 +229,9 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const get = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
 const set = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
-const img = k => `img/${k.i}.webp`;
+const img = k => `img/${k.p || (k.i + ".webp")}`;
 const label = k => [k.c, k.l, k.s].filter(Boolean).join(" ");
-const kt = k => k.s ? `${k.l} · ${k.s}` : k.l;
+const kt = k => k.s ? `${k.l} · ${k.s}` : (k.l || "");
 const bgOf = k => k.bg ? ` style="background:${k.bg}"` : "";
 const fmt = x => x.toFixed(2).replace(".", ",");
 
@@ -352,8 +352,8 @@ function cardHTML(k, back) {
     <img src="${img(k)}" alt="${esc(label(k))}" draggable="false">
     <span class="stamp"></span>
     <div class="info">
-      <div class="cn">${esc(k.c)} <small>FIFA ${k.f}</small></div>
-      <div class="kt">${esc(kt(k))}</div>
+      <div class="cn">${esc(k.c)}</div>
+      ${kt(k) ? `<div class="kt">${esc(kt(k))}</div>` : ""}
       ${k.cp ? `<div class="meta">${esc(k.cp)}</div>` : ""}
       ${k.u ? `<a href="${FKA}${k.u}/" target="_blank" rel="noopener">Ver más fotos</a>` : ""}
     </div></article>`;
@@ -418,7 +418,7 @@ function renderRank() {
       <div class="pos">${i + 1}</div>
       <div class="th"${bgOf(x.k)}><img src="${img(x.k)}" alt="" loading="lazy"></div>
       <div class="inf"><div class="cn">${esc(x.k.c)}</div>
-        <div class="meta">${esc(kt(x.k))}</div>
+        ${kt(x.k) ? `<div class="meta">${esc(kt(x.k))}</div>` : ""}
         ${mine ? `<div class="mine">Tu nota: ${mine}</div>` : ""}</div>
       <div class="scr"><b style="color:var(--r${Math.round(x.avg)})">${fmt(x.avg)}</b><span>${x.a[0]} voto${x.a[0] === 1 ? "" : "s"}</span><span>${x.a[2]} × 5★</span></div>
     </div>`;
@@ -435,7 +435,7 @@ function renderMine() {
   const list = KITS.filter(k => filterN ? votes[k.i] === filterN : votes[k.i]);
   $("m-grid").innerHTML = list.map(k => `<article class="gc" data-card="${k.i}">
     <div class="ph"${bgOf(k)}><img src="${img(k)}" alt="${esc(label(k))}" loading="lazy"></div>
-    <div class="bd"><div class="cn">${esc(k.c)}</div><div class="meta">${esc(kt(k))}</div>
+    <div class="bd"><div class="cn">${esc(k.c)}</div>${kt(k) ? `<div class="meta">${esc(kt(k))}</div>` : ""}
     <div class="mini">${[1, 2, 3, 4, 5].map(n => `<button data-k="${k.i}" data-n="${n}" aria-pressed="${votes[k.i] === n}" aria-label="Nota ${n}">${n}</button>`).join("")}</div></div>
   </article>`).join("");
   $("m-empty").hidden = list.length > 0;
